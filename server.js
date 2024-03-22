@@ -1,18 +1,33 @@
+'use strict';
+
+const express = require('express');
+const path = require('path');
+const { createServer } = require('http');
+
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 4009 });
 
-wss.on('connection', function connection(ws) {
-  console.log('New WebSocket connection');
+const app = express();
+app.use(express.static(path.join(__dirname, '/public')));
 
-  ws.on('message', function incoming(message) {
-    console.log('Received:', message);
-    // Echo the message back to the client
-    ws.send(message);
-  });
+const server = createServer(app);
+const wss = new WebSocket.Server({ server });
 
-  ws.on('close', function close() {
-    console.log('WebSocket connection closed');
+wss.on('connection', function (ws) {
+  const id = setInterval(function () {
+    ws.send(JSON.stringify(process.memoryUsage()), function () {
+      //
+      // Ignoring errors.
+      //
+    });
+  }, 100);
+  console.log('started client interval');
+
+  ws.on('close', function () {
+    console.log('stopping client interval');
+    clearInterval(id);
   });
 });
 
-console.log('WebSocket server started on port 4009');
+server.listen(4009, function () {
+  console.log(' Webscoket Listening on 4009');
+});
