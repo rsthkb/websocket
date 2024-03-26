@@ -17,8 +17,11 @@ if (isProduction) {
         key: readFileSync(process.env.KEY_PATH),
         cert: readFileSync(process.env.CERT_PATH),
     });
+    console.log("Prodcution server")
 } else {
     httpsServer = http.createServer();
+    console.log("Developement server")
+
 }
 
 io = new Server(httpsServer, {
