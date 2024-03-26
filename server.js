@@ -1,33 +1,44 @@
-'use strict';
+require("dotenv").config(); // Load dotenv configuration
 
-const express = require('express');
-const path = require('path');
-const { createServer } = require('http');
+const { readFileSync } = require("fs");
+const { createServer } = require("https");
+const { Server } = require("socket.io");
+const cors = require("cors"); // Import the cors package
+const http = require("http");
 
-const WebSocket = require('ws');
+let httpsServer;
+let io;
 
-const app = express();
-app.use(express.static(path.join(__dirname, '/public')));
+// Check if the environment is production or development
+const isProduction = process.env.NODE_ENV === "production";
 
-const server = createServer(app);
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', function (ws) {
-  const id = setInterval(function () {
-    ws.send(JSON.stringify(process.memoryUsage()), function () {
-      //
-      // Ignoring errors.
-      //
+if (isProduction) {
+    httpsServer = createServer({
+        key: readFileSync(process.env.KEY_PATH),
+        cert: readFileSync(process.env.CERT_PATH),
     });
-  }, 100);
-  console.log('started client interval');
+} else {
+    httpsServer = http.createServer();
+}
 
-  ws.on('close', function () {
-    console.log('stopping client interval');
-    clearInterval(id);
+io = new Server(httpsServer, {
+    cors: {
+        origin: process.env.origin,
+    },
+});
+
+io.on("connection", (socket) => {
+    console.log("Server connected");
+     // Listen for incoming messages from clients
+  socket.on("message", (data) => {
+    console.log("Message from client:", data);
+    // Broadcast the message to all clients
+     io.emit("message", "hello welcome to the team");
   });
 });
 
-server.listen(4009, function () {
-  console.log(' Webscoket Listening on 4009');
+const PORT = process.env.PORT || 4009;
+
+httpsServer.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });
