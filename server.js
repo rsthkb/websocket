@@ -28,16 +28,17 @@ io = new Server(httpsServer, {
     cors: {
         origin: process.env.origin,
     },
+    path: "/ws/"
 });
 
 io.on("connection", (socket) => {
     console.log("Server connected");
-     // Listen for incoming messages from clients
-  socket.on("message", (data) => {
-    console.log("Message from client:", data);
-    // Broadcast the message to all clients
-     io.emit("message", "hello welcome to the team");
-  });
+    // Listen for incoming messages from clients
+    socket.on("message", (data) => {
+        console.log("Message from client:", data);
+        // Broadcast the message to all clients
+        io.emit("message", "hello welcome to the team");
+    });
 });
 
 const PORT = process.env.PORT || 4009;
