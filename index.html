@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,23 +12,29 @@
       margin: 0;
       padding: 20px;
     }
+
     #messages {
       height: 200px;
       overflow-y: scroll;
       border: 1px solid #ccc;
       padding: 10px;
     }
+
     input[type="text"] {
       width: 80%;
       padding: 10px;
       font-size: 16px;
     }
+
     button {
       padding: 10px 20px;
       font-size: 16px;
     }
   </style>
+  <!-- Include the Socket.IO client library -->
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
+
 <body>
   <div id="messages"></div>
   <input type="text" id="messageInput" placeholder="Type your message...">
@@ -35,7 +42,7 @@
 
   <script>
     // JavaScript code to handle WebSocket connection and message sending
-    const ws = new WebSocket('ws://localhost:4009');
+    const socket = io('ws://localhost:4009', { path: "/ws/socket.io" });
 
     // Function to add a new message to the chat interface
     function addMessage(message) {
@@ -46,18 +53,19 @@
     }
 
     // Event listener for incoming messages from the WebSocket server
-    ws.addEventListener('message', function(event) {
-        console.log("messages", event.data);
-      addMessage('Server: ' + event.data);
-    });
+    socket.on("message", (data) => {
+      console.log("message connectd", data)
+      addMessage("Server" + data)
+    })
+
 
     // Event listener for the send button
-    document.getElementById('sendButton').addEventListener('click', function() {
+    document.getElementById('sendButton').addEventListener('click', function () {
       const messageInput = document.getElementById('messageInput');
       const message = messageInput.value;
       if (message.trim() !== '') {
         // Send the message to the WebSocket server
-        ws.send(message);
+        socket.emit(message);
         // Display the sent message in the chat interface
         addMessage('You: ' + message);
         // Clear the input field
@@ -66,4 +74,5 @@
     });
   </script>
 </body>
+
 </html>
